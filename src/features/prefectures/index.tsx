@@ -14,20 +14,14 @@ const Prefectures = () => {
 
   const [selectedPref, setSelectedPref] = useState<Prefecture[]>([]);
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "";
-  const ALL_PREFECTURES_API = process.env.REACT_APP_ALL_PREFECTURES_API;
+  const ALL_PREFECTURES_API = process.env.REACT_APP_ALL_PREFECTURES_API || "";
   const POPULATION_COMPOSITION_API =
     process.env.REACT_APP_POPULATION_COMPOSITION_API;
-  const API_KEY = process.env.REACT_APP_API_KEY;
 
   useEffect(() => {
     setIsFetching(true);
     axios
-      .get(BASE_URL + ALL_PREFECTURES_API, {
-        headers: {
-          "X-API-KEY": API_KEY,
-        },
-      })
+      .get(ALL_PREFECTURES_API)
       .then((res) => {
         setData(res?.data?.result);
         setIsFetching(false);
@@ -41,28 +35,17 @@ const Prefectures = () => {
   const fetchPopulationComposition = (prefCode: number) => {
     setLoading(true);
     axios
-      .get(
-        BASE_URL +
-          POPULATION_COMPOSITION_API +
-          `?prefCode=${prefCode}&cityCode=-`,
-        {
-          headers: {
-            "X-API-KEY": API_KEY,
-          },
-        }
-      )
+      .get(`population/composition/perYear?prefCode=${prefCode}&cityCode=-`)
       .then((res) => {
         setLoading(false);
         const compositions = res?.data?.result?.data;
 
         // filtered compositions
-        const filteredCompositions = [] as any;
+        const filteredCompositions = {} as any;
         compositions.forEach((item: any) => {
-          const value = {} as any;
-          value[item?.label] = item.data;
-          filteredCompositions?.push(value);
+          filteredCompositions[item?.label] = item.data;
         });
-
+        console.log(filteredCompositions);
         // new modified array
         const newData = {
           prefCode: prefCode,
