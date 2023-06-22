@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 interface Prefecture {
   prefCode: number;
   prefName: string;
@@ -35,7 +36,6 @@ const Prefectures = () => {
         setIsFetching(false);
         console.log("error in fetching prefectures", error);
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPopulationComposition = (prefCode: number) => {
@@ -56,7 +56,7 @@ const Prefectures = () => {
         const compositions = res?.data?.result?.data;
 
         // filtered compositions
-        let filteredCompositions = [] as any;
+        const filteredCompositions = [] as any;
         compositions.forEach((item: any) => {
           const value = {} as any;
           value[item?.label] = item.data;
@@ -64,7 +64,7 @@ const Prefectures = () => {
         });
 
         // new modified array
-        let newData = {
+        const newData = {
           prefCode: prefCode,
           data: filteredCompositions,
         };
@@ -96,33 +96,30 @@ const Prefectures = () => {
 
   return (
     <div style={{ padding: 50 }}>
-      {loading || isFetching ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          <h2>Prefecture List</h2>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            {data.map((prefecture) => (
-              <div key={prefecture.prefCode}>
-                <input
-                  disabled={loading}
-                  type="checkbox"
-                  checked={selectedPref.includes(prefecture)}
-                  onChange={() => handleCheckboxChange(prefecture)}
-                />
-                <span>{prefecture.prefName}</span>
-              </div>
-            ))}
-          </div>
+      {(loading || isFetching) && <p>Loading...</p>}
+      <div>
+        <h2>Prefecture List</h2>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+            marginBottom: "10px",
+          }}
+        >
+          {data.map((prefecture) => (
+            <div key={prefecture.prefCode}>
+              <input
+                disabled={loading}
+                type="checkbox"
+                checked={selectedPref.includes(prefecture)}
+                onChange={() => handleCheckboxChange(prefecture)}
+              />
+              <span>{prefecture.prefName}</span>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
       <pre>{JSON.stringify(populationData, null, 2)}</pre>
     </div>
   );
