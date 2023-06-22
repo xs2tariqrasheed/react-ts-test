@@ -1,4 +1,12 @@
 import React, { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 import axios from "axios";
 
 interface Prefecture {
@@ -45,7 +53,7 @@ const Prefectures = () => {
         compositions.forEach((item: any) => {
           filteredCompositions[item?.label] = item.data;
         });
-        console.log(filteredCompositions);
+
         // new modified array
         const newData = {
           prefCode: prefCode,
@@ -77,6 +85,22 @@ const Prefectures = () => {
     }
   };
 
+  // converting data in to graph acceptable data
+  const graphData: any =
+    populationData.length > 0 &&
+    populationData?.map((item) =>
+      Object.values(item?.data).map((item: any) =>
+        item?.map((item: any, index: any) => {
+          return {
+            name: item?.year,
+            uv: item?.value,
+          };
+        })
+      )
+    );
+
+  const graphChartData = graphData && graphData[0][0];
+
   return (
     <div style={{ padding: 50 }}>
       {(loading || isFetching) && <p>Loading...</p>}
@@ -103,7 +127,21 @@ const Prefectures = () => {
           ))}
         </div>
       </div>
-      <pre>{JSON.stringify(populationData, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(populationData, null, 2)}</pre> */}
+      {populationData?.length > 0 && (
+        <LineChart
+          style={{ marginLeft: 30, marginTop: 50 }}
+          width={1200}
+          height={400}
+          data={graphChartData}
+        >
+          <Line type="monotone" dataKey="uv" stroke="#8884d8" />
+          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+        </LineChart>
+      )}
     </div>
   );
 };
