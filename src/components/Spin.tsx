@@ -1,6 +1,11 @@
 import React from "react";
 import { createUseStyles } from "react-jss";
 
+interface SpinProps {
+  spinning: boolean;
+  children: React.ReactNode;
+}
+
 const useStyles = createUseStyles({
   spinnerContainer: {
     position: "relative",
@@ -34,7 +39,7 @@ const useStyles = createUseStyles({
   },
 });
 
-export const Spin = ({ spinning, children }: any) => {
+export const Spin = ({ spinning, children }: SpinProps) => {
   const classes = useStyles();
   return (
     <div className={classes.spinnerContainer}>

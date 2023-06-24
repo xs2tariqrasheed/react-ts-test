@@ -2,7 +2,6 @@
 import React from "react";
 import Prefectures from "./features/prefectures";
 import initAxiosGlobalConfigs from "./utils/axiosConfg";
-import Example from "./features/prefectures/example";
 
 function App() {
   initAxiosGlobalConfigs();
@@ -10,7 +9,6 @@ function App() {
     <main>
       <section>
         <Prefectures />
-        {/* <Example /> */}
       </section>
     </main>
   );

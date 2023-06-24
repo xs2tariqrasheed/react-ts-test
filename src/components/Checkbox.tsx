@@ -1,6 +1,12 @@
-/* eslint-disable react/prop-types */
 import React from "react";
 import { createUseStyles } from "react-jss";
+
+interface CheckBoxProps {
+  label?: string;
+  disabled?: boolean;
+  checked: boolean;
+  onChange: (e: boolean) => void;
+}
 
 const useStyles = createUseStyles({
   checkboxContainer: {
@@ -20,16 +26,17 @@ const useStyles = createUseStyles({
   },
 });
 
-function MyCheckbox(props: any) {
+function CheckBox(props: CheckBoxProps) {
   const classes = useStyles();
 
-  const handleCheckboxChange = (e: any) => {
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     props.onChange(e.target.checked);
   };
 
   return (
     <div className={classes.checkboxContainer}>
       <input
+        disabled={props?.disabled || false}
         type="checkbox"
         className={classes.checkboxInput}
         checked={props.checked}
@@ -40,4 +47,4 @@ function MyCheckbox(props: any) {
   );
 }
 
-export default MyCheckbox;
+export default CheckBox;
