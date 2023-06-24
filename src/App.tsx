@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React from "react";
-import "./App.css";
 import Prefectures from "./features/prefectures";
+import Example from "./features/prefectures/example";
 
 function App() {
   return (
-    <div>
-      <header className="App-header">
-        <Prefectures />
-      </header>
-    </div>
+    <main>
+      <section>
+        {/* <Prefectures /> */}
+        <Example />
+      </section>
+    </main>
   );
 }
 
