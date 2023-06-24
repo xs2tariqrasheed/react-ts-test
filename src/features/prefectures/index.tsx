@@ -8,20 +8,16 @@ import {
   Tooltip,
 } from "recharts";
 import axios from "axios";
-
 interface Prefecture {
   prefCode: number;
   prefName: string;
 }
-
 const Prefectures = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [populationData, setPopulationData] = useState<any[]>([]);
-
   const [selectedPref, setSelectedPref] = useState<Prefecture[]>([]);
-
   const ALL_PREFECTURES_API = process.env.REACT_APP_ALL_PREFECTURES_API || "";
   const POPULATION_COMPOSITION_API =
     process.env.REACT_APP_POPULATION_COMPOSITION_API;
@@ -47,13 +43,11 @@ const Prefectures = () => {
       .then((res) => {
         setLoading(false);
         const compositions = res?.data?.result?.data;
-
         // filtered compositions
         const filteredCompositions = {} as any;
         compositions.forEach((item: any) => {
           filteredCompositions[item?.label] = item.data;
         });
-
         // new modified array
         const newData = {
           prefCode: prefCode,
@@ -66,7 +60,6 @@ const Prefectures = () => {
         console.log("error in fetching prefectures", error);
       });
   };
-
   const handleCheckboxChange = (prefecture: Prefecture) => {
     if (
       populationData.find((item) => item.prefCode === prefecture?.prefCode) !==
@@ -84,23 +77,6 @@ const Prefectures = () => {
       setSelectedPref([...selectedPref, prefecture]);
     }
   };
-
-  // converting data in to graph acceptable data
-  const graphData: any =
-    populationData.length > 0 &&
-    populationData?.map((item) =>
-      Object.values(item?.data).map((item: any) =>
-        item?.map((item: any, index: any) => {
-          return {
-            name: item?.year,
-            uv: item?.value,
-          };
-        })
-      )
-    );
-
-  const graphChartData = graphData && graphData[0][0];
-
   return (
     <div style={{ padding: 50 }}>
       {(loading || isFetching) && <p>Loading...</p>}
@@ -133,11 +109,58 @@ const Prefectures = () => {
           style={{ marginLeft: 30, marginTop: 50 }}
           width={1200}
           height={400}
-          data={graphChartData}
+          data={populationData}
         >
-          <Line type="monotone" dataKey="uv" stroke="#8884d8" />
-          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-          <XAxis dataKey="name" />
+          {populationData?.map((item: any, index: number) => (
+            <React.Fragment key={index}>
+              <Line
+                type="monotone"
+                dataKey="value"
+                data={item?.data["総人口"].map((entry: any) => ({
+                  year: entry.year,
+                  value: entry.value,
+                }))}
+                name="総人口"
+                stroke="#8884D8"
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                data={item?.data["年少人口"].map((entry: any) => ({
+                  year: entry.year,
+                  value: entry.value,
+                }))}
+                name="年少人口"
+                stroke="#82CA9D"
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                data={item?.data["生産年齢人口"].map((entry: any) => ({
+                  year: entry.year,
+                  value: entry.value,
+                }))}
+                name="生産年齢人口"
+                stroke="#FF7F50"
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                data={item?.data["老年人口"].map((entry: any) => ({
+                  year: entry.year,
+                  value: entry.value,
+                }))}
+                name="老年人口"
+                stroke="#FFC658"
+              />
+            </React.Fragment>
+          ))}
+          <XAxis
+            dataKey="year"
+            ticks={populationData[0]?.data["総人口"].map(
+              (entry: any) => entry.year
+            )}
+          />
           <YAxis />
           <Tooltip />
         </LineChart>
@@ -145,5 +168,4 @@ const Prefectures = () => {
     </div>
   );
 };
-
 export default Prefectures;
