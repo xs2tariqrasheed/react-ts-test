@@ -1,16 +1,18 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React from "react";
-import "./App.css";
 import Prefectures from "./features/prefectures";
 import initAxiosGlobalConfigs from "./utils/axiosConfg";
+import Example from "./features/prefectures/example";
 
 function App() {
   initAxiosGlobalConfigs();
   return (
-    <div>
-      <header className="App-header">
+    <main>
+      <section>
         <Prefectures />
-      </header>
-    </div>
+        {/* <Example /> */}
+      </section>
+    </main>
   );
 }
 
