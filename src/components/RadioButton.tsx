@@ -34,7 +34,7 @@ function RadioButton(props: RadioButtonProps) {
         value={props.value}
         checked={props.checked}
       />
-      <div className={classes.radioLabel}>{props.label}</div>
+      <span className={classes.radioLabel}>{props.label}</span>
     </label>
   );
 }

@@ -2,24 +2,31 @@
 import React from "react";
 import Prefectures from "./features/prefectures";
 import initAxiosGlobalConfigs from "./utils/axiosConfg";
+import { Container } from "./components/Layout";
+
+const ignoreIt = (
+  <div style={{ marginTop: 30, float: "right" }}>
+    <p>
+      Test / Assignment: <b>Frontend (React)</b>
+    </p>
+    <p>
+      Made By:{" "}
+      <b>
+        <i>Tariq Rasheed</i>
+      </b>
+    </p>
+  </div>
+);
 
 function App() {
   initAxiosGlobalConfigs();
   return (
-    <main>
-      <p style={{ position: "absolute", top: 0, right: 50 }}>
-        Test / Assignment: <b>Frontend (React)</b>
-      </p>
-      <p style={{ position: "absolute", top: 20, right: 50 }}>
-        Made By:{" "}
-        <b>
-          <i>Tariq Rasheed</i>
-        </b>
-      </p>
+    <Container>
       <section>
         <Prefectures />
+        {ignoreIt}
       </section>
-    </main>
+    </Container>
   );
 }
 

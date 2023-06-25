@@ -15,6 +15,12 @@ import CheckBox from "../../components/Checkbox";
 import strokeColors from "./strokeColors";
 import { Prefecture, StatType } from "./types";
 import getGraphData from "./getGraphData";
+import { Col, Row } from "../../components/Layout";
+import useStyles from "./style";
+
+const PREFECTURES_API = process.env.REACT_APP_PREFECTURES_API || "";
+const POPULATION_COMPOSITION_API =
+  process.env.REACT_APP_POPULATION_COMPOSITION_API;
 
 const populationTypes = ["総人口", "年少人口", "生産年齢人口", "老年人口"];
 
@@ -23,23 +29,23 @@ const Prefectures = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [prefStatType, setPrefStatType] = useState<StatType>("総人口");
 
-  const PREFECTURES_API = process.env.REACT_APP_PREFECTURES_API || "";
-  const POPULATION_COMPOSITION_API =
-    process.env.REACT_APP_POPULATION_COMPOSITION_API;
+  const classes = useStyles();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPrefectureList = async () => {
       setLoading(true);
       try {
         const res = await axios.get(PREFECTURES_API);
         setPrefList(res.data.result);
+
+        // Fetch population composition for first prefecture, to show line graph
         await fetchPopulationComposition(1);
       } catch (error) {
         console.log(error);
       }
     };
 
-    fetchData();
+    fetchPrefectureList();
   }, []);
 
   const fetchPopulationComposition = async (prefCode: number) => {
@@ -55,6 +61,13 @@ const Prefectures = () => {
         },
         {}
       );
+
+      /*
+      Note: there're many ways to set state and manage state, for this scenario.
+      The following is not the best, for best practice we can use Emmer or useReducer hook to simplify code.
+      I believe for this test/assignment it's fine as it's not going to be in production. 
+      */
+      // Set population composition state for the given prefCode
       setPrefList((prevPrefList: Prefecture[]) =>
         prevPrefList.map((p, i) =>
           p.prefCode === prefCode
@@ -73,7 +86,12 @@ const Prefectures = () => {
     if (selected) {
       fetchPopulationComposition(prefecture.prefCode);
     } else {
-      // remove
+      /*
+      Note: there're many ways to set state and manage state, for this scenario.
+      The following is not the best, for best practice we can use Emmer or useReducer hook to simplify code.
+      I believe for this test/assignment it's fine as it's not going to be in production. 
+      */
+      // Remove the composition for unchecked pref from the state.
       setPrefList(
         prefList.map((p) =>
           p.prefCode === prefecture.prefCode
@@ -91,83 +109,55 @@ const Prefectures = () => {
   const graphData = getGraphData(prefList, prefStatType);
 
   return (
-    <div style={{ padding: 50 }}>
-      <Spin spinning={loading}>
-        <div>
-          <h2>Prefecture List</h2>
-          {/* TODO: fix the inline style */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            {prefList.map((pref: Prefecture) => (
-              // TODO: Fix the inline style
-              <div key={pref.prefCode} style={{ width: 90 }}>
-                <CheckBox
-                  color={pref.stroke}
-                  label={pref.prefName}
-                  checked={!!pref.selected}
-                  onChange={(checked) => onSelectPref(checked, pref)}
+    <Spin spinning={loading}>
+      <h3>Prefectures</h3>
+      <Row>
+        {prefList.map((pref: Prefecture) => (
+          <Col span={1} sm={4} key={pref.prefCode}>
+            <CheckBox
+              color={pref.stroke}
+              label={pref.prefName}
+              checked={!!pref.selected}
+              onChange={(checked) => onSelectPref(checked, pref)}
+            />
+          </Col>
+        ))}
+      </Row>
+
+      <div className={classes.graphWrapper}>
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart data={graphData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" />
+            <YAxis />
+            <Tooltip />
+            {Object.keys(graphData?.[0] || {})
+              .filter((k: string) => k !== "year" && k !== "stroke")
+              .map((key, index) => (
+                <Line
+                  type="monotone"
+                  dataKey={key}
+                  key={key}
+                  stroke={graphData?.[index]?.stroke}
                 />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "start",
-            justifyContent: "space-between",
-            marginTop: 30,
-          }}
-        >
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={graphData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip />
-              {Object.keys(graphData?.[0] || {})
-                .filter((k: string) => k !== "year" && k !== "stroke")
-                .map((key, index) => (
-                  <Line
-                    type="monotone"
-                    dataKey={key}
-                    key={key}
-                    stroke={graphData?.[index]?.stroke}
-                  />
-                ))}
-            </LineChart>
-          </ResponsiveContainer>
-          {/* TODO: fix inline style */}
-          <div
-            style={{
-              marginRight: 10,
-              width: 300,
-              paddingLeft: 30,
-            }}
-          >
-            <h3>Population Composition</h3>
-            <div>
-              {populationTypes.map((item, index) => (
-                <div key={index} style={{ marginTop: index === 0 ? 0 : 20 }}>
-                  <RadioButton
-                    label={item}
-                    value={item}
-                    checked={prefStatType === item}
-                    onChange={handleRadioChange}
-                  />
-                </div>
               ))}
-            </div>
-          </div>
-        </div>
-      </Spin>
-    </div>
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <Row>
+        {populationTypes.map((item) => (
+          <Col span={2} sm={6} key={item}>
+            <RadioButton
+              label={item}
+              value={item}
+              checked={prefStatType === item}
+              onChange={handleRadioChange}
+              key={item}
+            />
+          </Col>
+        ))}
+      </Row>
+    </Spin>
   );
 };
 export default Prefectures;
