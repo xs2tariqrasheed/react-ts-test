@@ -1,5 +1,15 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Getting Started / Running Locally (Dev)
+
+1- create `.env.local` file and add `REACT_APP_API_KEY` with RESAS API key.
+
+2- Make sure you have `node 19 or above`
+
+3- Run `npm install`
+
+3- Run `npm start`
+
 ## Available Scripts
 
 In the project directory, you can run:

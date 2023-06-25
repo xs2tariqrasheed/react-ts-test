@@ -18,9 +18,8 @@ import getGraphData from "./getGraphData";
 import { Col, Row } from "../../components/Layout";
 import useStyles from "./style";
 
-const PREFECTURES_API = process.env.REACT_APP_PREFECTURES_API || "";
-const POPULATION_COMPOSITION_API =
-  process.env.REACT_APP_POPULATION_COMPOSITION_API;
+const PREFECTURES_API = "prefectures";
+const POPULATION_COMPOSITION_API = "population/composition/perYear";
 
 const populationTypes = ["総人口", "年少人口", "生産年齢人口", "老年人口"];
 

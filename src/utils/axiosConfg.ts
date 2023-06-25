@@ -1,10 +1,12 @@
 import axios from "axios";
 
-const apiLocation = process.env.REACT_APP_BASE_URL;
+const apiLocation = "https://opendata.resas-portal.go.jp/api/v1/";
 const apiKey = process.env.REACT_APP_API_KEY;
 
-if (!apiLocation) {
-  throw new Error("REACT_APP_BASE_URL is not found");
+if (!apiKey) {
+  throw new Error(
+    "REACT_APP_API_KEY is not found, please check .env file for api key"
+  );
 }
 console.log(`API LOCATION IS ${apiLocation}`);
 
