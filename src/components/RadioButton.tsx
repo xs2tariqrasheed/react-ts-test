@@ -1,51 +1,40 @@
-import React from "react";
+import { ChangeEvent } from "react";
 import { createUseStyles } from "react-jss";
 
-interface RadioBoxProps {
+interface RadioButtonProps {
   label?: string;
-  disabled?: boolean;
-  value?: string | number | readonly string[] | undefined;
-  checked: boolean | undefined;
-  onChange: (e: string | number | readonly string[] | undefined) => void;
+  checked: boolean;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const useStyles = createUseStyles({
   radioButtonContainer: {
     display: "flex",
     alignItems: "center",
-  },
-  radioButton: {
-    marginRight: "8px",
-    width: "16px",
-    height: "16px",
-    borderRadius: "50%",
-    border: "1px solid #999",
     cursor: "pointer",
   },
   radioLabel: {
-    fontSize: "14px",
+    margin: "5px 0px 0px 4px",
+  },
+  checkboxInput: {
+    height: 18,
+    width: 18,
   },
 });
 
-function RadioButton(props: RadioBoxProps) {
+function RadioButton(props: RadioButtonProps) {
   const classes = useStyles();
-
-  const handleRadioChange = () => {
-    props.onChange(props.value);
-  };
-
   return (
-    <label style={{ display: "flex", alignItems: "center" }}>
+    <label className={classes.radioButtonContainer}>
       <input
-        disabled={props?.disabled}
-        style={{ height: 18, width: 18 }}
+        className={classes.checkboxInput}
         type="radio"
+        onChange={props.onChange}
         value={props.value}
         checked={props.checked}
-        onChange={handleRadioChange}
       />
-
-      <div style={{ margin: "5px 0px 0px 4px" }}>{props.label}</div>
+      <div className={classes.radioLabel}>{props.label}</div>
     </label>
   );
 }

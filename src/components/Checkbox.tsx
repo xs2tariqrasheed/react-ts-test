@@ -5,7 +5,8 @@ interface CheckBoxProps {
   label?: string;
   disabled?: boolean;
   checked: boolean;
-  onChange: (e: boolean) => void;
+  color?: string;
+  onChange: (checked: boolean) => void;
 }
 
 const useStyles = createUseStyles({
@@ -42,7 +43,9 @@ function CheckBox(props: CheckBoxProps) {
         checked={props.checked}
         onChange={handleCheckboxChange}
       />
-      <label className={classes.checkboxLabel}>{props.label}</label>
+      <label className={classes.checkboxLabel} style={{ color: props.color }}>
+        {props.label}
+      </label>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { createUseStyles } from "react-jss";
+import { BORDER_GREY, PRIMARY_COLOR } from "../style/colors";
 
 interface SpinProps {
   spinning: boolean;
@@ -7,17 +8,13 @@ interface SpinProps {
 }
 
 const useStyles = createUseStyles({
-  spinnerContainer: {
-    position: "relative",
-    display: "inline-block",
-  },
   spinnerOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
     zIndex: 1,
   },
   spinner: {
@@ -25,13 +22,13 @@ const useStyles = createUseStyles({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 30,
-    height: 30,
-    border: "4px solid rgba(243, 243, 243, 0.7)",
+    width: 20,
+    height: 20,
+    border: `4px solid ${BORDER_GREY}`,
     borderRadius: "50%",
-    borderTop: "4px solid #3498db",
-    animation: "$spin 1.5s linear infinite",
-    zIndex: 2,
+    borderTop: `4px solid ${PRIMARY_COLOR}`,
+    animation: "$spin 0.4s linear infinite",
+    zIndex: 2000,
   },
   "@keyframes spin": {
     "0%": { transform: "rotate(0deg)" },
@@ -42,7 +39,7 @@ const useStyles = createUseStyles({
 export const Spin = ({ spinning, children }: SpinProps) => {
   const classes = useStyles();
   return (
-    <div className={classes.spinnerContainer}>
+    <div>
       {spinning && <div className={classes.spinnerOverlay}></div>}
       {spinning && <div className={classes.spinner}></div>}
       {children}

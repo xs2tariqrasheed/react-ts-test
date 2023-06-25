@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -6,134 +6,96 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  ResponsiveContainer,
 } from "recharts";
 import axios from "axios";
 import { Spin } from "../../components/Spin";
 import RadioButton from "../../components/RadioButton";
 import CheckBox from "../../components/Checkbox";
-interface Prefecture {
-  prefCode: number;
-  prefName: string;
-}
+import strokeColors from "./strokeColors";
+import { Prefecture, StatType } from "./types";
+import getGraphData from "./getGraphData";
+
+const populationTypes = ["総人口", "年少人口", "生産年齢人口", "老年人口"];
+
 const Prefectures = () => {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [checked, setChecked] = useState("total");
-  const [value, setValue] = useState(2);
-  const [isFetching, setIsFetching] = useState(false);
-  const [populationData, setPopulationData] = useState<any[]>([]);
-  const [selectedPref, setSelectedPref] = useState<Prefecture | null>(null);
-  const ALL_PREFECTURES_API = process.env.REACT_APP_ALL_PREFECTURES_API || "";
+  const [prefList, setPrefList] = useState<Prefecture[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [prefStatType, setPrefStatType] = useState<StatType>("総人口");
+
+  const PREFECTURES_API = process.env.REACT_APP_PREFECTURES_API || "";
   const POPULATION_COMPOSITION_API =
     process.env.REACT_APP_POPULATION_COMPOSITION_API;
 
   useEffect(() => {
-    setIsFetching(true);
-    axios
-      .get(ALL_PREFECTURES_API)
-      .then((res) => {
-        setData(res?.data?.result);
-        setIsFetching(false);
-        fetchPopulationComposition(1);
-        setValue(2);
-        setChecked("total");
-      })
-      .catch((error) => {
-        setIsFetching(false);
-        console.log("error in fetching prefectures", error);
-      });
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(PREFECTURES_API);
+        setPrefList(res.data.result);
+        await fetchPopulationComposition(1);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const fetchPopulationComposition = (prefCode: number) => {
+  const fetchPopulationComposition = async (prefCode: number) => {
     setLoading(true);
-    axios
-      .get(`population/composition/perYear?prefCode=${prefCode}&cityCode=-`)
-      .then((res) => {
-        setLoading(false);
-        const compositions = res?.data?.result?.data;
-        // filtered compositions
-        const filteredCompositions = {} as any;
-        compositions.forEach((item: any) => {
-          filteredCompositions[item?.label] = item.data;
-        });
-        // new modified array
-        const newData = {
-          prefCode: prefCode,
-          data: filteredCompositions,
-        };
-        setPopulationData([newData]);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.log("error in fetching prefectures", error);
-      });
-  };
-  const handleCheckboxChange = (prefecture: Prefecture) => {
-    setValue(2);
-    setChecked("total");
-    if (
-      populationData.find((item) => item.prefCode === prefecture?.prefCode) !==
-      undefined
-    ) {
-      setPopulationData(
-        populationData.filter((pref) => pref?.prefCode !== prefecture.prefCode)
+    try {
+      const res = await axios.get(
+        `${POPULATION_COMPOSITION_API}?prefCode=${prefCode}&cityCode=-`
       );
-    } else {
-      fetchPopulationComposition(prefecture?.prefCode);
-    }
-
-    if (selectedPref?.prefCode === prefecture?.prefCode) {
-      setSelectedPref(null);
-    } else {
-      setSelectedPref(prefecture);
+      const composition = res?.data?.result?.data.reduce(
+        (acc: any, item: any) => {
+          acc[item?.label] = item.data;
+          return acc;
+        },
+        {}
+      );
+      setPrefList((prevPrefList: Prefecture[]) =>
+        prevPrefList.map((p, i) =>
+          p.prefCode === prefCode
+            ? { ...p, selected: true, composition, stroke: strokeColors[i] }
+            : p
+        )
+      );
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
     }
   };
 
-  useEffect(() => {
-    if (checked === "total") {
-      setValue(2);
-    } else if (checked === "young") {
-      setValue(0);
-    } else if (checked === "working") {
-      setValue(1);
+  const onSelectPref = (selected: boolean, prefecture: Prefecture) => {
+    if (selected) {
+      fetchPopulationComposition(prefecture.prefCode);
     } else {
-      setValue(3);
+      // remove
+      setPrefList(
+        prefList.map((p) =>
+          p.prefCode === prefecture.prefCode
+            ? { ...p, selected: false, composition: null, stroke: undefined }
+            : p
+        )
+      );
     }
-  }, [checked]);
-
-  // Converting data according to chart data
-  const graphData: any =
-    populationData.length > 0 &&
-    populationData?.map((item) =>
-      Object.values(item?.data).map((item: any) =>
-        item?.map((item: any, index: any) => {
-          return {
-            name: item?.year,
-            population: item?.value,
-          };
-        })
-      )
-    );
-  // NOTE: Value state is to handle the population composition
-  // 2 for Total, 0 for Young, 1 for Working and 3 for Elderly populations
-  const graphChartData = graphData && graphData[0][value];
-
-  const handleRadioChange = (value: any) => {
-    setChecked(value);
   };
 
-  useEffect(() => {
-    if (data) {
-      const value = [data[0]];
-      setSelectedPref(value[0]);
-    }
-  }, [data]);
+  const handleRadioChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPrefStatType(e.target.value as StatType);
+  };
+
+  const graphData = getGraphData(prefList, prefStatType);
 
   return (
     <div style={{ padding: 50 }}>
-      <Spin spinning={isFetching || loading}>
+      <Spin spinning={loading}>
         <div>
           <h2>Prefecture List</h2>
+          {/* TODO: fix the inline style */}
           <div
             style={{
               display: "flex",
@@ -142,12 +104,14 @@ const Prefectures = () => {
               marginBottom: "10px",
             }}
           >
-            {data.map((prefecture) => (
-              <div key={prefecture.prefCode}>
+            {prefList.map((pref: Prefecture) => (
+              // TODO: Fix the inline style
+              <div key={pref.prefCode} style={{ width: 90 }}>
                 <CheckBox
-                  label={prefecture.prefName}
-                  checked={selectedPref?.prefCode === prefecture.prefCode}
-                  onChange={() => handleCheckboxChange(prefecture)}
+                  color={pref.stroke}
+                  label={pref.prefName}
+                  checked={!!pref.selected}
+                  onChange={(checked) => onSelectPref(checked, pref)}
                 />
               </div>
             ))}
@@ -157,60 +121,49 @@ const Prefectures = () => {
           style={{
             display: "flex",
             alignItems: "start",
+            justifyContent: "space-between",
+            marginTop: 30,
           }}
         >
-          {populationData?.length > 0 && (
-            <LineChart
-              style={{ marginLeft: 30, marginTop: 50 }}
-              width={1100}
-              height={400}
-              data={graphChartData}
-            >
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={graphData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis dataKey="year" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="population" stroke="#8884D8" />
+              {Object.keys(graphData?.[0] || {})
+                .filter((k: string) => k !== "year" && k !== "stroke")
+                .map((key, index) => (
+                  <Line
+                    type="monotone"
+                    dataKey={key}
+                    key={key}
+                    stroke={graphData?.[index]?.stroke}
+                  />
+                ))}
             </LineChart>
-          )}
-          <div style={{ marginTop: 35, marginLeft: 35 }}>
-            {populationData?.length > 0 && (
-              <div>
-                <h3>Population Composition</h3>
-                <div>
-                  {[
-                    {
-                      label: "Total Population",
-                      value: "total",
-                    },
-                    {
-                      label: "Young Population",
-                      value: "young",
-                    },
-                    {
-                      label: "Working Age Population",
-                      value: "working",
-                    },
-                    {
-                      label: "Elderly Population",
-                      value: "elderly",
-                    },
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      style={{ marginTop: index === 0 ? 0 : 20 }}
-                    >
-                      <RadioButton
-                        label={item?.label}
-                        value={item.value}
-                        checked={checked === item.value}
-                        onChange={handleRadioChange}
-                      />
-                    </div>
-                  ))}
+          </ResponsiveContainer>
+          {/* TODO: fix inline style */}
+          <div
+            style={{
+              marginRight: 10,
+              width: 300,
+              paddingLeft: 30,
+            }}
+          >
+            <h3>Population Composition</h3>
+            <div>
+              {populationTypes.map((item, index) => (
+                <div key={index} style={{ marginTop: index === 0 ? 0 : 20 }}>
+                  <RadioButton
+                    label={item}
+                    value={item}
+                    checked={prefStatType === item}
+                    onChange={handleRadioChange}
+                  />
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
       </Spin>
