@@ -111,19 +111,22 @@ const Prefectures = () => {
   return (
     <Spin spinning={loading}>
       <h3>Prefectures</h3>
+      {/* Radio buttons section for selecting Population composition type */}
       <Row>
-        {prefList.map((pref: Prefecture) => (
-          <Col span={1} sm={4} key={pref.prefCode}>
-            <CheckBox
-              color={pref.stroke}
-              label={pref.prefName}
-              checked={!!pref.selected}
-              onChange={(checked) => onSelectPref(checked, pref)}
+        {populationTypes.map((item) => (
+          <Col span={2} sm={6} key={item}>
+            <RadioButton
+              label={item}
+              value={item}
+              checked={prefStatType === item}
+              onChange={handleRadioChange}
+              key={item}
             />
           </Col>
         ))}
       </Row>
 
+      {/* Graph component section */}
       <div className={classes.graphWrapper}>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={graphData}>
@@ -144,15 +147,16 @@ const Prefectures = () => {
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Pref selection section */}
       <Row>
-        {populationTypes.map((item) => (
-          <Col span={2} sm={6} key={item}>
-            <RadioButton
-              label={item}
-              value={item}
-              checked={prefStatType === item}
-              onChange={handleRadioChange}
-              key={item}
+        {prefList.map((pref: Prefecture) => (
+          <Col span={1} sm={4} key={pref.prefCode}>
+            <CheckBox
+              color={pref.stroke}
+              label={pref.prefName}
+              checked={!!pref.selected}
+              onChange={(checked) => onSelectPref(checked, pref)}
             />
           </Col>
         ))}

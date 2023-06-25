@@ -1,6 +1,6 @@
 import React from "react";
 import { createUseStyles } from "react-jss";
-import { BORDER_GREY, PRIMARY_COLOR } from "../style/colors";
+import { BORDER_GREY, PRIMARY_COLOR } from "../../style/colors";
 
 interface SpinProps {
   spinning: boolean;

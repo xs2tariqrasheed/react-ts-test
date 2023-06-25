@@ -12,7 +12,6 @@ const useStyles = createUseStyles({
     maxWidth: 1200,
     marginLeft: "auto",
     marginRight: "auto",
-    paddingTop: 20,
   },
   row: {
     display: "flex",

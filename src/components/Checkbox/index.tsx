@@ -7,6 +7,7 @@ interface CheckBoxProps {
   checked: boolean;
   color?: string;
   onChange: (checked: boolean) => void;
+  id?: string;
 }
 
 const useStyles = createUseStyles({
@@ -34,16 +35,23 @@ function CheckBox(props: CheckBoxProps) {
     props.onChange(e.target.checked);
   };
 
+  // Generate a unique id for this checkbox.
+  const checkboxId = props.id || Math.random().toString();
   return (
     <div className={classes.checkboxContainer}>
       <input
+        id={checkboxId}
         disabled={props?.disabled || false}
         type="checkbox"
         className={classes.checkboxInput}
         checked={props.checked}
         onChange={handleCheckboxChange}
       />
-      <label className={classes.checkboxLabel} style={{ color: props.color }}>
+      <label
+        htmlFor={checkboxId}
+        className={classes.checkboxLabel}
+        style={{ color: props.color }}
+      >
         {props.label}
       </label>
     </div>
